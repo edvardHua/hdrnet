@@ -11,6 +11,8 @@ import os
 import random
 
 import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 
 def check_dir(dirname):
@@ -154,19 +156,21 @@ class ImageFilesDataPipeline(DataPipeline):
         if not check_dir(dirname):
             raise ValueError("Invalid data path.")
         with open(self.path, 'r') as fid:
-            flist = [l.strip() for l in fid.xreadlines()]
+            flist = [l.strip() for l in fid.readlines()]
 
         if self.shuffle:
             random.shuffle(flist)
 
-        input_files = [os.path.join(dirname, 'input', f) for f in flist]
-        output_files = [os.path.join(dirname, 'output', f) for f in flist]
+        # input_files = [os.path.join(dirname, 'input', f) for f in flist]
+        # output_files = [os.path.join(dirname, 'output', f) for f in flist]
+
+        input_files = [os.path.join(dirname, 'input/JPG/480p', f) for f in flist]
+        output_files = [os.path.join(dirname, 'expertC/JPG/480p', f) for f in flist]
 
         self.nsamples = len(input_files)
 
         input_queue, output_queue = tf.train.slice_input_producer(
-            [input_files, output_files], shuffle=self.shuffle,
-            seed=0123, num_epochs=self.num_epochs)
+            [input_files, output_files], shuffle=self.shuffle, num_epochs=self.num_epochs)
 
         input_wl = 255.0
         output_wl = 255.0
@@ -203,4 +207,14 @@ class ImageFilesDataPipeline(DataPipeline):
 
 
 if __name__ == '__main__':
+    ds = ImageFilesDataPipeline(
+        "/Users/zihua.zeng/Dataset/色彩增强数据集/开源数据集/fiveK/train_input.txt",
+        shuffle=True,
+        batch_size=4,
+        nthreads=1,
+        fliplr=True,
+        flipud=True,
+        rotate=True,
+        output_resolution=[512, 512]
+    )
     pass
